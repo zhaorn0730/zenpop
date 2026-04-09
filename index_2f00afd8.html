@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#f0ebe3">
+<title>ZenPop 解压乐园</title>
+<link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlplblBvcCDop6PljovkuZDlm60iLAogICJzaG9ydF9uYW1lIjogIlplblBvcCIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjZjBlYmUzIiwKICAidGhlbWVfY29sb3IiOiAiI2YwZWJlMyIsCiAgImljb25zIjogW3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTAwIDEwMCc+PHRleHQgeT0nLjllbScgZm9udC1zaXplPSc5MCc+8J+rqzwvdGV4dD48L3N2Zz4iLCJzaXplcyI6IjE5MngxOTIiLCJ0eXBlIjoiaW1hZ2Uvc3ZnK3htbCJ9XQp9">
+<style>
+/* --- SKELETON STYLES --- */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0ebe3;--bg2:#faf8f5;--card:#ffffff;
+  --text:#3a3535;--text2:#8a8585;--text3:#bbb5b0;
+  --accent:#e8a87c;--accent2:#d4a5a5;--accent3:#95b8d1;
+  --accent4:#b8e0d2;--accent5:#d6c3e0;
+  --pop:#ff6b6b;--pop2:#ffd93d;
+  --radius:20px;--radius-sm:12px;
+  --safe-top:env(safe-area-inset-top,20px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --tab-h:72px;
+  --font:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+}
+html,body{
+  width:100%;height:100%;overflow:hidden;
+  background:var(--bg);color:var(--text);
+  font-family:var(--font);touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;
+}
+/* --- HEADER --- */
+.header{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:calc(var(--safe-top) + 4px) 20px 8px;
+  background:linear-gradient(to bottom,var(--bg) 60%,transparent);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.header h1{
+  font-size:18px;font-weight:700;letter-spacing:.5px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2),var(--accent5));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.header-right{display:flex;align-items:center;gap:12px}
+.timer{font-size:12px;color:var(--text2);font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.sound-btn{
+  width:32px;height:32px;border-radius:50%;border:none;
+  background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.06);
+  font-size:16px;cursor:pointer;display:grid;place-items:center;
+  transition:transform .2s;
+}
+.sound-btn:active{transform:scale(.9)}
+
+/* --- PAGES CONTAINER --- */
+.pages{
+  position:fixed;
+  top:calc(var(--safe-top) + 48px);
+  left:0;right:0;
+  bottom:calc(var(--tab-h) + var(--safe-bottom));
+  overflow:hidden;
+}
+.page{
+  position:absolute;inset:0;
+  opacity:0;transform:translateY(20px) scale(.97);
+  transition:opacity .4s ease,transform .4s ease;
+  pointer-events:none;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:12px 16px;
+}
+.page.active{
+  opacity:1;transform:translateY(0) scale(1);
+  pointer-events:auto;
+}
+
+/* --- BOTTOM TABS --- */
+.tabs{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  padding:0 8px calc(var(--safe-bottom) + 6px);
+  background:linear-gradient(to top,var(--bg) 70%,transparent);
+}
+.tabs-inner{
+  display:flex;justify-content:space-around;
+  background:var(--card);border-radius:24px;
+  box-shadow:0 -2px 20px rgba(0,0,0,.06);
+  padding:6px 4px;
+}
+.tab{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  padding:8px 0 4px;border:none;background:none;
+  cursor:pointer;transition:all .3s;position:relative;
+  border-radius:16px;
+}
+.tab-icon{font-size:22px;transition:transform .3s}
+.tab-label{font-size:10px;color:var(--text3);margin-top:2px;transition:color .3s;font-weight:500}
+.tab.active{background:rgba(232,168,124,.1)}
+.tab.active .tab-icon{transform:scale(1.15)}
+.tab.active .tab-label{color:var(--accent);font-weight:600}
+
+/* --- BUBBLE PAGE --- */
+.bubble-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(52px,1fr));
+  gap:6px;padding:8px 0;
+}
+.bubble{
+  aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,rgba(255,255,255,.9),var(--accent3) 60%,var(--accent2));
+  box-shadow:inset -3px -3px 6px rgba(0,0,0,.08),0 2px 6px rgba(149,184,209,.3);
+  cursor:pointer;transition:transform .15s;position:relative;overflow:hidden;
+}
+.bubble::after{
+  content:'';position:absolute;top:18%;left:22%;width:30%;height:25%;
+  background:radial-gradient(ellipse,rgba(255,255,255,.8),transparent);
+  border-radius:50%;
+}
+.bubble:active{transform:scale(.92)}
+.bubble.popped{
+  transform:scale(0);opacity:0;
+  transition:transform .3s cubic-bezier(.36,.07,.19,.97),opacity .3s;
+  pointer-events:none;
+}
+.bubble-counter{
+  text-align:center;font-size:14px;color:var(--text2);
+  padding:8px 0;font-variant-numeric:tabular-nums;
+}
+.bubble-reset{
+  display:none;margin:20px auto;padding:12px 32px;
+  border:none;border-radius:var(--radius);
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#fff;font-size:15px;font-weight:600;cursor:pointer;
+  box-shadow:0 4px 15px rgba(232,168,124,.3);
+}
+.bubble-reset.show{display:block;animation:popIn .4s ease}
+
+/* --- COLORING PAGE --- */
+.color-canvas-wrap{
+  display:flex;justify-content:center;align-items:center;
+  padding:10px 0;
+}
+.color-canvas-wrap svg{
+  width:100%;max-width:320px;height:auto;
+}
+.color-canvas-wrap svg path[data-zone]{
+  cursor:pointer;stroke:#d0cbc5;stroke-width:1.5;
+  transition:fill .3s ease;
+}
+.color-palette{
+  display:flex;gap:8px;justify-content:center;
+  flex-wrap:wrap;padding:12px 0;
+}
+.color-swatch{
+  width:36px;height:36px;border-radius:50%;cursor:pointer;
+  border:3px solid transparent;transition:all .2s;
+  box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+.color-swatch.active{border-color:var(--text);transform:scale(1.15)}
+.color-actions{display:flex;gap:10px;justify-content:center;padding:8px 0}
+.color-actions button{
+  padding:8px 20px;border:none;border-radius:var(--radius-sm);
+  background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,.06);
+  font-size:13px;color:var(--text2);cursor:pointer;font-family:var(--font);
+}
+
+/* --- SMASH PAGE --- */
+.smash-area{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;min-height:60vh;position:relative;
+}
+.smash-object{
+  font-size:100px;cursor:pointer;transition:transform .1s;
+  position:relative;filter:drop-shadow(0 8px 20px rgba(0,0,0,.1));
+}
+.smash-object:active{transform:scale(.94)}
+.smash-cracks{
+  position:absolute;inset:0;pointer-events:none;
+  opacity:0;transition:opacity .3s;
+}
+.smash-hp{
+  width:200px;height:6px;border-radius:3px;
+  background:var(--bg);margin-top:20px;overflow:hidden;
+}
+.smash-hp-bar{
+  height:100%;border-radius:3px;
+  background:linear-gradient(90deg,var(--pop),var(--pop2));
+  transition:width .2s;
+}
+.smash-counter{font-size:13px;color:var(--text2);margin-top:12px;font-variant-numeric:tabular-nums}
+.smash-hint{font-size:12px;color:var(--text3);margin-top:8px}
+
+/* --- SAND PAGE --- */
+.sand-container{position:relative;width:100%;border-radius:var(--radius);overflow:hidden}
+.sand-canvas{
+  width:100%;display:block;border-radius:var(--radius);
+  background:#1a1a2e;touch-action:none;
+}
+.sand-colors{
+  display:flex;gap:8px;justify-content:center;padding:12px 0;
+}
+.sand-color-btn{
+  padding:6px 16px;border:none;border-radius:20px;
+  font-size:12px;cursor:pointer;font-family:var(--font);
+  background:var(--card);color:var(--text2);
+  box-shadow:0 2px 6px rgba(0,0,0,.06);transition:all .2s;
+}
+.sand-color-btn.active{background:var(--text);color:#fff}
+.sand-hint{text-align:center;font-size:11px;color:var(--text3);padding:4px 0}
+
+/* --- BREATHE PAGE --- */
+.breathe-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;min-height:60vh;
+  transition:background-color 2s ease;border-radius:var(--radius);
+}
+.breathe-circle-outer{
+  width:200px;height:200px;border-radius:50%;
+  display:grid;place-items:center;
+  background:conic-gradient(from 0deg,var(--accent),var(--accent3),var(--accent5),var(--accent4),var(--accent));
+  transition:transform 4s ease-in-out;
+  box-shadow:0 0 60px rgba(232,168,124,.2);
+}
+.breathe-circle-inner{
+  width:180px;height:180px;border-radius:50%;
+  background:var(--bg2);display:grid;place-items:center;
+}
+.breathe-text{
+  font-size:20px;font-weight:600;color:var(--text);
+  transition:opacity .5s;
+}
+.breathe-sub{font-size:13px;color:var(--text2);margin-top:16px}
+.breathe-timer{
+  font-size:48px;font-weight:200;color:var(--text3);
+  margin-top:8px;font-variant-numeric:tabular-nums;
+}
+.breathe-cycles{font-size:12px;color:var(--text3);margin-top:12px}
+.breathe-start{
+  margin-top:20px;padding:12px 36px;border:none;border-radius:var(--radius);
+  background:linear-gradient(135deg,var(--accent4),var(--accent3));
+  color:#fff;font-size:15px;font-weight:600;cursor:pointer;
+  box-shadow:0 4px 15px rgba(149,184,209,.3);font-family:var(--font);
+}
+
+/* --- PARTICLE OVERLAY --- */
+.particle{
+  position:fixed;pointer-events:none;z-index:200;
+  border-radius:50%;
+}
+
+/* --- CELEBRATION --- */
+.celebration{
+  position:fixed;inset:0;z-index:300;
+  display:none;place-items:center;
+  background:rgba(240,235,227,.8);
+  backdrop-filter:blur(4px);
+}
+.celebration.show{display:grid;animation:fadeIn .3s}
+.celebration-text{font-size:28px;font-weight:700;color:var(--accent);text-align:center}
+
+/* --- ANIMATIONS --- */
+@keyframes popIn{0%{transform:scale(0);opacity:0}60%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes confetti{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(720deg);opacity:0}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(232,168,124,.3)}50%{box-shadow:0 0 0 15px rgba(232,168,124,0)}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <h1>ZenPop 解压乐园</h1>
+  <div class="header-right">
+    <span class="timer" id="globalTimer">00:00</span>
+    <button class="sound-btn" id="soundBtn" aria-label="Toggle sound">🔊</button>
+  </div>
+</header>
+
+<!-- PAGES -->
+<main class="pages">
+  <!-- PLACEHOLDER PAGES — filled by JS -->
+  <div class="page active" id="pageBubble"></div>
+  <div class="page" id="pageColor"></div>
+  <div class="page" id="pageSmash"></div>
+  <div class="page" id="pageSand"></div>
+  <div class="page" id="pageBreathe"></div>
+</main>
+
+<!-- TABS -->
+<nav class="tabs"><div class="tabs-inner">
+  <button class="tab active" data-page="pageBubble"><span class="tab-icon">🫧</span><span class="tab-label">泡泡</span></button>
+  <button class="tab" data-page="pageColor"><span class="tab-icon">🎨</span><span class="tab-label">涂色</span></button>
+  <button class="tab" data-page="pageSmash"><span class="tab-icon">🔨</span><span class="tab-label">破坏</span></button>
+  <button class="tab" data-page="pageSand"><span class="tab-icon">🌊</span><span class="tab-label">沙盘</span></button>
+  <button class="tab" data-page="pageBreathe"><span class="tab-icon">🧘</span><span class="tab-label">呼吸</span></button>
+</div></nav>
+
+<script>
+/* ========== GLOBAL STATE ========== */
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+let soundOn = true;
+let startTime = Date.now();
+let audioCtx = null;
+
+function getAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function vibrate(ms) { try { navigator.vibrate && navigator.vibrate(ms); } catch(e){} }
+
+function playTone(freq, dur, type='sine', vol=.15) {
+  if (!soundOn) return;
+  try {
+    const ctx = getAudio();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = type;
+    o.frequency.setValueAtTime(freq, ctx.currentTime);
+    g.gain.setValueAtTime(vol, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + dur);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(); o.stop(ctx.currentTime + dur);
+  } catch(e){}
+}
+
+function playPop() { playTone(800 + Math.random()*400, .12, 'sine', .12); }
+function playSmash() { playTone(120, .3, 'sawtooth', .1); }
+function playBreath() { playTone(396, .8, 'sine', .06); }
+function playCelebrate() { [523,659,784].forEach((f,i) => setTimeout(()=> playTone(f,.3,'triangle',.1), i*120)); }
+
+/* --- Global Timer --- */
+setInterval(()=>{
+  const s = Math.floor((Date.now()-startTime)/1000);
+  const m = Math.floor(s/60);
+  $('#globalTimer').textContent = String(m).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+},1000);
+
+/* --- Sound Toggle --- */
+$('#soundBtn').addEventListener('click', ()=>{
+  soundOn = !soundOn;
+  $('#soundBtn').textContent = soundOn ? '🔊' : '🔇';
+  vibrate(10);
+});
+
+/* --- Tab Navigation --- */
+$$('.tab').forEach(tab => {
+  tab.addEventListener('click', ()=>{
+    $$('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    $$('.page').forEach(p => p.classList.remove('active'));
+    $('#'+tab.dataset.page).classList.add('active');
+    vibrate(8);
+    if (tab.dataset.page==='pageSand') initSand();
+  });
+});
+
+/* --- Particle Burst --- */
+function burst(x, y, colors, count=8) {
+  for (let i=0; i<count; i++){
+    const p = document.createElement('div');
+    p.className='particle';
+    const sz = 4+Math.random()*6;
+    const ang = Math.random()*Math.PI*2;
+    const dist = 30+Math.random()*60;
+    const dx = Math.cos(ang)*dist, dy = Math.sin(ang)*dist;
+    Object.assign(p.style,{
+      left:x+'px',top:y+'px',width:sz+'px',height:sz+'px',
+      background:colors[Math.floor(Math.random()*colors.length)],
+      transition:`all ${.4+Math.random()*.3}s cubic-bezier(.25,.46,.45,.94)`,
+      opacity:'1'
+    });
+    document.body.appendChild(p);
+    requestAnimationFrame(()=>{
+      p.style.transform=`translate(${dx}px,${dy}px)`;
+      p.style.opacity='0';
+    });
+    setTimeout(()=>p.remove(),800);
+  }
+}
+
+/* ========== 1. BUBBLE PAGE ========== */
+(function initBubble(){
+  const total = 63; // 9x7 grid
+  let popped = 0;
+  const page = $('#pageBubble');
+  page.innerHTML = `
+    <div class="bubble-counter">已挤破 <strong id="bubbleCount">0</strong> / ${total} 个泡泡</div>
+    <div class="bubble-grid" id="bubbleGrid"></div>
+    <button class="bubble-reset" id="bubbleReset">🫧 再来一次</button>
+  `;
+  const grid = $('#bubbleGrid');
+  const colors = ['#95b8d1','#b8e0d2','#d6c3e0','#d4a5a5','#e8a87c','#a8d8ea','#f3c4fb'];
+
+  function makeBubbles(){
+    grid.innerHTML='';popped=0;$('#bubbleCount').textContent='0';
+    $('#bubbleReset').classList.remove('show');
+    for(let i=0;i<total;i++){
+      const b = document.createElement('div');
+      b.className='bubble';
+      const c1 = colors[Math.floor(Math.random()*colors.length)];
+      const c2 = colors[Math.floor(Math.random()*colors.length)];
+      b.style.background=`radial-gradient(circle at 35% 35%,rgba(255,255,255,.85),${c1} 60%,${c2})`;
+      b.addEventListener('click',(e)=>{
+        if(b.classList.contains('popped'))return;
+        b.classList.add('popped');
+        popped++;
+        $('#bubbleCount').textContent=popped;
+        playPop();vibrate(15);
+        const r=b.getBoundingClientRect();
+        burst(r.left+r.width/2,r.top+r.height/2,['#95b8d1','#f3c4fb','#b8e0d2','#ffd93d'],6);
+        if(popped>=total){
+          $('#bubbleReset').classList.add('show');
+          playCelebrate();
+        }
+      });
+      grid.appendChild(b);
+    }
+  }
+  makeBubbles();
+  $('#bubbleReset').addEventListener('click',()=>{vibrate(20);makeBubbles();});
+})();
+
+/* ========== 2. COLORING PAGE ========== */
+(function initColor(){
+  const page = $('#pageColor');
+  const palette = ['#e8a87c','#d4a5a5','#95b8d1','#b8e0d2','#d6c3e0','#ffd93d','#ff6b6b','#74b49b','#a29bfe','#fd79a8','#f8f9fa','#2d3436'];
+  let selectedColor = palette[0];
+  let history = [];
+  let filledCount = 0;
+  const totalZones = 24;
+
+  // Generate mandala SVG
+  const mandala = `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+    ${generateMandala()}
+  </svg>`;
+
+  function generateMandala() {
+    let paths = '';
+    const cx=150,cy=150;
+    // Inner petals
+    for(let i=0;i<8;i++){
+      const a=i*45*Math.PI/180;
+      const a2=(i*45+22.5)*Math.PI/180;
+      const r1=30,r2=80;
+      const x1=cx+Math.cos(a)*r1,y1=cy+Math.sin(a)*r1;
+      const x2=cx+Math.cos(a2)*r2,y2=cy+Math.sin(a2)*r2;
+      const x3=cx+Math.cos(a+45*Math.PI/180)*r1,y3=cy+Math.sin(a+45*Math.PI/180)*r1;
+      paths+=`<path data-zone="${i}" fill="#faf8f5" d="M${cx},${cy} Q${x1},${y1} ${x2},${y2} Q${x3},${y3} ${cx},${cy}Z"/>`;
+    }
+    // Outer petals
+    for(let i=0;i<8;i++){
+      const a=(i*45+22.5)*Math.PI/180;
+      const a1=(i*45)*Math.PI/180;
+      const a2=((i+1)*45)*Math.PI/180;
+      const r1=80,r2=130;
+      const x0=cx+Math.cos(a)*r1,y0=cy+Math.sin(a)*r1;
+      const x1=cx+Math.cos(a1)*r2,y1=cy+Math.sin(a1)*r2;
+      const x2=cx+Math.cos(a2)*r2,y2=cy+Math.sin(a2)*r2;
+      paths+=`<path data-zone="${i+8}" fill="#faf8f5" d="M${x0},${y0} Q${x1},${y1} ${cx+Math.cos((a1+a2)/2)*r2*1.05},${cy+Math.sin((a1+a2)/2)*r2*1.05} Q${x2},${y2} ${x0},${y0}Z"/>`;
+    }
+    // Outer ring segments
+    for(let i=0;i<8;i++){
+      const a1=i*45*Math.PI/180,a2=(i+1)*45*Math.PI/180;
+      const r1=125,r2=145;
+      const pts = [
+        cx+Math.cos(a1)*r1,cy+Math.sin(a1)*r1,
+        cx+Math.cos(a1)*r2,cy+Math.sin(a1)*r2,
+        cx+Math.cos(a2)*r2,cy+Math.sin(a2)*r2,
+        cx+Math.cos(a2)*r1,cy+Math.sin(a2)*r1
+      ];
+      paths+=`<path data-zone="${i+16}" fill="#faf8f5" d="M${pts[0]},${pts[1]} L${pts[2]},${pts[3]} A${r2},${r2} 0 0,1 ${pts[4]},${pts[5]} L${pts[6]},${pts[7]} A${r1},${r1} 0 0,0 ${pts[0]},${pts[1]}Z"/>`;
+    }
+    // Center circle
+    paths+=`<circle data-zone="center" cx="${cx}" cy="${cy}" r="20" fill="#faf8f5" stroke="#d0cbc5" stroke-width="1.5"/>`;
+    return paths;
+  }
+
+  page.innerHTML = `
+    <div class="color-canvas-wrap" id="colorSvgWrap">${mandala}</div>
+    <div class="color-palette" id="colorPalette"></div>
+    <div class="color-actions">
+      <button id="colorUndo">↩ 撤销</button>
+      <button id="colorClear">🗑 清空</button>
+    </div>
+  `;
+
+  const palEl = $('#colorPalette');
+  palette.forEach((c,i)=>{
+    const s = document.createElement('div');
+    s.className='color-swatch'+(i===0?' active':'');
+    s.style.background=c;
+    s.addEventListener('click',()=>{
+      selectedColor=c;
+      $$('.color-swatch').forEach(x=>x.classList.remove('active'));
+      s.classList.add('active');
+      vibrate(8);
+    });
+    palEl.appendChild(s);
+  });
+
+  // Click zones
+  $$('[data-zone]').forEach(zone=>{
+    zone.addEventListener('click',()=>{
+      const prev = zone.getAttribute('fill');
+      history.push({el:zone,prev});
+      zone.setAttribute('fill',selectedColor);
+      playTone(500+Math.random()*300,.1,'sine',.08);
+      vibrate(10);
+      // Check completion
+      const allFilled = [...$$('[data-zone]')].every(z=>z.getAttribute('fill')!=='#faf8f5');
+      if(allFilled) { playCelebrate(); showConfetti(); }
+    });
+  });
+
+  $('#colorUndo').addEventListener('click',()=>{
+    if(!history.length)return;
+    const h = history.pop();
+    h.el.setAttribute('fill',h.prev);
+    vibrate(10);
+  });
+  $('#colorClear').addEventListener('click',()=>{
+    $$('[data-zone]').forEach(z=>z.setAttribute('fill','#faf8f5'));
+    history=[];vibrate(20);
+  });
+
+  function showConfetti(){
+    for(let i=0;i<30;i++){
+      const c=document.createElement('div');
+      c.style.cssText=`position:fixed;left:${Math.random()*100}vw;top:-20px;width:8px;height:8px;
+        border-radius:${Math.random()>.5?'50%':'2px'};z-index:999;pointer-events:none;
+        background:${palette[Math.floor(Math.random()*palette.length)]};
+        animation:confetti ${1+Math.random()*2}s ease-out forwards;
+        animation-delay:${Math.random()*.5}s`;
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(),3000);
+    }
+  }
+})();
+
+/* ========== 3. SMASH PAGE ========== */
+(function initSmash(){
+  const page = $('#pageSmash');
+  const items = [
+    {emoji:'🏺',name:'花瓶',hp:8},
+    {emoji:'🥛',name:'玻璃杯',hp:6},
+    {emoji:'🍽️',name:'盘子',hp:5},
+    {emoji:'💡',name:'灯泡',hp:4},
+    {emoji:'📱',name:'手机',hp:10},
+    {emoji:'⏰',name:'闹钟',hp:7},
+    {emoji:'🪞',name:'镜子',hp:9},
+    {emoji:'🎸',name:'吉他',hp:12},
+  ];
+  let current = 0, hp = 0, maxHp = 0, destroyed = 0;
+
+  page.innerHTML = `
+    <div class="smash-area">
+      <div class="smash-object" id="smashObj"></div>
+      <div class="smash-hp"><div class="smash-hp-bar" id="smashBar"></div></div>
+      <div class="smash-counter">已破坏 <strong id="smashCount">0</strong> 个物品</div>
+      <div class="smash-hint">疯狂点击来破坏它！</div>
+    </div>
+  `;
+
+  function loadItem(){
+    const item = items[current % items.length];
+    hp = item.hp; maxHp = item.hp;
+    const obj = $('#smashObj');
+    obj.textContent = item.emoji;
+    obj.style.transform=''; obj.style.filter='';obj.style.opacity='1';
+    $('#smashBar').style.width='100%';
+  }
+
+  loadItem();
+
+  $('#smashObj').addEventListener('click',(e)=>{
+    hp--;
+    const pct = hp/maxHp;
+    $('#smashBar').style.width=(pct*100)+'%';
+    vibrate(25);
+    playTone(100+Math.random()*100,.1,'square',.08);
+
+    // Shake
+    const obj=$('#smashObj');
+    obj.style.animation='none';
+    obj.offsetHeight;
+    obj.style.animation='shake .15s';
+
+    // Cracks via filter
+    const dmg = 1-pct;
+    obj.style.filter=`brightness(${1-dmg*.3}) contrast(${1+dmg*.5}) saturate(${1-dmg*.6})`;
+
+    // Burst
+    const r=obj.getBoundingClientRect();
+    burst(e.clientX||r.left+r.width/2,e.clientY||r.top+r.height/2,['#ff6b6b','#ffd93d','#ccc'],4);
+
+    if(hp<=0){
+      destroyed++;
+      $('#smashCount').textContent=destroyed;
+      playSmash();vibrate(50);
+      // Explosion
+      for(let i=0;i<20;i++){
+        burst(r.left+r.width/2+Math.random()*40-20,r.top+r.height/2+Math.random()*40-20,['#ff6b6b','#ffd93d','#ff9f43','#ddd'],5);
+      }
+      obj.style.transform='scale(0)';obj.style.opacity='0';
+      current++;
+      setTimeout(loadItem,600);
+    }
+  });
+})();
+
+/* ========== 4. SAND PAGE ========== */
+let sandInited=false;
+function initSand(){
+  if(sandInited) return;
+  sandInited=true;
+  const page=$('#pageSand');
+  page.innerHTML=`
+    <div class="sand-container">
+      <canvas class="sand-canvas" id="sandCanvas"></canvas>
+    </div>
+    <div class="sand-colors">
+      <button class="sand-color-btn active" data-sand="gold">🏖 金沙</button>
+      <button class="sand-color-btn" data-sand="rainbow">🌈 彩虹</button>
+      <button class="sand-color-btn" data-sand="starry">✨ 星空</button>
+    </div>
+    <div class="sand-hint">滑动屏幕产生粒子 · 摇晃设备清空</div>
+  `;
+
+  const canvas=$('#sandCanvas');
+  const ctx=canvas.getContext('2d');
+  let W,H;
+  const particles=[];
+  let sandMode='gold';
+  const maxParticles=3000;
+
+  function resize(){
+    const r=canvas.parentElement.getBoundingClientRect();
+    W=canvas.width=r.width;
+    H=canvas.height=Math.min(r.width*1.2,window.innerHeight*.55);
+    canvas.style.height=H+'px';
+  }
+  resize();
+  window.addEventListener('resize',resize);
+
+  const sandColors={
+    gold:()=>`hsl(${35+Math.random()*15},${70+Math.random()*20}%,${55+Math.random()*25}%)`,
+    rainbow:()=>`hsl(${Math.random()*360},${70+Math.random()*20}%,${55+Math.random()*20}%)`,
+    starry:()=>{
+      const r=Math.random();
+      return r<.5?`hsl(${220+Math.random()*40},${60+Math.random()*30}%,${40+Math.random()*40}%)`
+        :`hsl(${50+Math.random()*20},${80}%,${75+Math.random()*20}%)`;
+    }
+  };
+
+  // Grid for stacking
+  const gridSize=3;
+  let grid;
+  function resetGrid(){ grid=new Uint8Array(Math.ceil(W/gridSize)*Math.ceil(H/gridSize)); }
+  resetGrid();
+  function getGrid(x,y){ const gx=Math.floor(x/gridSize),gy=Math.floor(y/gridSize),cols=Math.ceil(W/gridSize); if(gx<0||gx>=cols||gy<0||gy>=Math.ceil(H/gridSize))return 1; return grid[gy*cols+gx]; }
+  function setGrid(x,y,v){ const gx=Math.floor(x/gridSize),gy=Math.floor(y/gridSize),cols=Math.ceil(W/gridSize); if(gx>=0&&gx<cols&&gy>=0&&gy<Math.ceil(H/gridSize)) grid[gy*cols+gx]=v; }
+
+  function addParticle(x,y){
+    if(particles.length>=maxParticles) particles.shift();
+    particles.push({
+      x,y,
+      vx:(Math.random()-.5)*2,
+      vy:Math.random()*2+1,
+      color:sandColors[sandMode](),
+      size:gridSize,
+      settled:false
+    });
+  }
+
+  let isDown=false,lastX=0,lastY=0;
+  function getPos(e){
+    const r=canvas.getBoundingClientRect();
+    const t=e.touches?e.touches[0]:e;
+    return{x:t.clientX-r.left,y:t.clientY-r.top};
+  }
+  canvas.addEventListener('pointerdown',(e)=>{isDown=true;const p=getPos(e);lastX=p.x;lastY=p.y;for(let i=0;i<5;i++)addParticle(p.x+(Math.random()-0.5)*10,p.y+(Math.random()-0.5)*10);});
+  canvas.addEventListener('pointermove',(e)=>{
+    if(!isDown)return;
+    const p=getPos(e);
+    const dx=p.x-lastX,dy=p.y-lastY,dist=Math.sqrt(dx*dx+dy*dy);
+    const steps=Math.max(1,Math.floor(dist/4));
+    for(let i=0;i<steps;i++){
+      const t=i/steps;
+      addParticle(lastX+dx*t+(Math.random()-.5)*8, lastY+dy*t+(Math.random()-.5)*8);
+    }
+    lastX=p.x;lastY=p.y;
+  });
+  canvas.addEventListener('pointerup',()=>isDown=false);
+  canvas.addEventListener('pointerleave',()=>isDown=false);
+
+  // Sand color buttons
+  $$('.sand-color-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      $$('.sand-color-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      sandMode=btn.dataset.sand;
+      vibrate(10);
+    });
+  });
+
+  // Shake to clear
+  let lastShake=0;
+  window.addEventListener('devicemotion',(e)=>{
+    const a=e.accelerationIncludingGravity;
+    if(!a)return;
+    const force=Math.abs(a.x)+Math.abs(a.y)+Math.abs(a.z);
+    if(force>35&&Date.now()-lastShake>1000){
+      lastShake=Date.now();
+      particles.length=0;resetGrid();vibrate(100);
+    }
+  });
+
+  // Render loop
+  function tick(){
+    ctx.fillStyle='rgba(26,26,46,0.15)';
+    ctx.fillRect(0,0,W,H);
+
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      if(p.settled){
+        ctx.fillStyle=p.color;
+        ctx.fillRect(Math.floor(p.x),Math.floor(p.y),p.size,p.size);
+        continue;
+      }
+      p.vy+=.15; // gravity
+      p.vx*=.99;
+      p.x+=p.vx;
+      p.y+=p.vy;
+
+      // Bounds
+      if(p.x<0){p.x=0;p.vx*=-.5;}
+      if(p.x>W-p.size){p.x=W-p.size;p.vx*=-.5;}
+
+      // Floor or stacking
+      if(p.y>=H-p.size){
+        p.y=H-p.size;p.settled=true;
+        setGrid(p.x,p.y,1);
+      } else if(getGrid(p.x,p.y+p.size)){
+        // try slide
+        const canLeft=!getGrid(p.x-gridSize,p.y+p.size)&&p.x-gridSize>=0;
+        const canRight=!getGrid(p.x+gridSize,p.y+p.size)&&p.x+gridSize<W;
+        if(canLeft&&canRight){ p.x+=(Math.random()>.5?-1:1)*gridSize; }
+        else if(canLeft){ p.x-=gridSize; }
+        else if(canRight){ p.x+=gridSize; }
+        else { p.settled=true; setGrid(p.x,p.y,1); }
+      }
+
+      ctx.fillStyle=p.color;
+      ctx.fillRect(Math.floor(p.x),Math.floor(p.y),p.size,p.size);
+    }
+    requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+/* ========== 5. BREATHE PAGE ========== */
+(function initBreathe(){
+  const page=$('#pageBreathe');
+  page.innerHTML=`
+    <div class="breathe-wrap" id="breatheWrap">
+      <div class="breathe-circle-outer" id="breatheCircle">
+        <div class="breathe-circle-inner">
+          <span class="breathe-text" id="breatheText">准备好了吗？</span>
+        </div>
+      </div>
+      <div class="breathe-sub" id="breatheSub">4-7-8 呼吸法</div>
+      <div class="breathe-timer" id="breatheTimer"></div>
+      <div class="breathe-cycles" id="breatheCycles"></div>
+      <button class="breathe-start" id="breatheStart">开始呼吸</button>
+    </div>
+  `;
+
+  let running=false, cycles=0, timer=null;
+  const phases=[
+    {name:'吸气',duration:4,scale:1.3,bg:'rgba(149,184,209,.12)'},
+    {name:'屏息',duration:7,scale:1.3,bg:'rgba(214,195,224,.12)'},
+    {name:'呼气',duration:8,scale:1,bg:'rgba(184,224,210,.12)'},
+  ];
+
+  $('#breatheStart').addEventListener('click',()=>{
+    if(running){
+      running=false;
+      clearTimeout(timer);
+      $('#breatheStart').textContent='开始呼吸';
+      $('#breatheText').textContent='准备好了吗？';
+      $('#breatheTimer').textContent='';
+      return;
+    }
+    running=true;cycles=0;
+    $('#breatheStart').textContent='停止';
+    runPhase(0);
+  });
+
+  function runPhase(pi){
+    if(!running)return;
+    const phase=phases[pi];
+    const circle=$('#breatheCircle');
+    const text=$('#breatheText');
+    const wrap=$('#breatheWrap');
+
+    text.textContent=phase.name;
+    circle.style.transform=`scale(${phase.scale})`;
+    circle.style.transition=`transform ${phase.duration}s ease-in-out`;
+    wrap.style.backgroundColor=phase.bg;
+
+    playBreath();vibrate(15);
+
+    let sec=phase.duration;
+    $('#breatheTimer').textContent=sec;
+    const countdown=setInterval(()=>{
+      sec--;
+      if(sec>0) $('#breatheTimer').textContent=sec;
+      else { clearInterval(countdown); $('#breatheTimer').textContent=''; }
+    },1000);
+
+    timer=setTimeout(()=>{
+      const next=(pi+1)%3;
+      if(next===0){
+        cycles++;
+        $('#breatheCycles').textContent=`已完成 ${cycles} 个循环`;
+      }
+      runPhase(next);
+    },phase.duration*1000);
+  }
+})();
+
+/* ========== INIT ========== */
+document.addEventListener('DOMContentLoaded',()=>{
+  // Resume audio context on first interaction
+  document.addEventListener('click',()=>{
+    if(audioCtx&&audioCtx.state==='suspended') audioCtx.resume();
+  },{once:true});
+});
+</script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"75124c326cb447fe934cde04713ae013","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
